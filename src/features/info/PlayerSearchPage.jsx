@@ -11,9 +11,7 @@ export default function PlayerSearchPage() {
   const [query, setQuery] = useState("");
 
   const filtered = players.filter((player) =>
-    player.username
-      .toLowerCase()
-      .includes(query.toLowerCase())
+    player.username?.toLowerCase().includes(query.toLowerCase())
   );
 
   return (

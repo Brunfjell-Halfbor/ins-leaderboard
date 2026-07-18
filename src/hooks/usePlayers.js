@@ -1,25 +1,35 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState, } from "react";
 import { playerService } from "../services/playerService";
-
+  
 export function usePlayers() {
-  const [players, setPlayers] = useState([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadPlayers();
-  }, []);
+    const [players, setPlayers] = useState([]);
+    const [loading, setLoading] =useState(true);
+    const [error, setError] = useState(null);
+    const loadPlayers = useCallback(async () => {
 
-  async function loadPlayers() {
-    const response =
-      await playerService.getPlayers();
+        try {
+            setLoading(true);
+            setError(null);
 
-    setPlayers(response.data);
-    setLoading(false);
-  }
+            const data = await playerService.getPlayers();
 
-  return {
-    players,
-    loading,
-    refresh: loadPlayers,
-  };
+            setPlayers(data);
+        } catch(err) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+        }, []);
+
+    useEffect(() => {
+        loadPlayers();
+    }, [loadPlayers]);
+
+    return {
+        players,
+        loading,
+        error,
+        refresh: loadPlayers,
+    };
 }

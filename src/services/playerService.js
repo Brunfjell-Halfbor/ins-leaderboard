@@ -1,36 +1,119 @@
-import { apiResponse } from "./api";
+import request from "./client";
 
-const mockPlayers = [
-  {
-    steamId: "76561198000000001",
-    username: "Ghost",
-    level: 128,
-    kills: 5412,
-    deaths: 1298,
-    playtime: 802,
-    lastSeen: "2026-06-20T04:00:00Z",
-  },
-  {
-    steamId: "76561198000000002",
-    username: "Ranger",
-    level: 117,
-    kills: 4890,
-    deaths: 1342,
-    playtime: 691,
-    lastSeen: "2026-06-19T16:30:00Z",
-  },
-];
+
+function normalizePlayer(player) {
+  return {
+    steamId:
+      player.steamId ??
+      player.steam_id ??
+      null,
+
+    profile: {
+      name:
+        player.profile?.name ??
+        "Unknown",
+
+      avatar:
+        player.profile?.avatar ??
+        null,
+
+      profileUrl:
+        player.profile?.profileUrl ??
+        null,
+    },
+
+    stats: {
+      kills:
+        player.stats?.kills ??
+        0,
+
+      deaths:
+        player.stats?.deaths ??
+        0,
+
+      wins:
+        player.stats?.wins ??
+        0,
+
+      losses:
+        player.stats?.losses ??
+        0,
+
+      score:
+        player.stats?.score ??
+        0,
+
+      killstreak:
+        player.stats?.killstreak ??
+        0,
+
+      caps:
+        player.stats?.caps ??
+        0,
+
+      suicides:
+        player.stats?.suicides ??
+        0,
+
+      suppressions:
+        player.stats?.suppressions ??
+        0,
+
+      headshotsGiven:
+        player.stats?.headshotsGiven ??
+        player.stats?.headshot_given ??
+        0,
+
+      headshotsTaken:
+        player.stats?.headshotsTaken ??
+        player.stats?.headshot_taken ??
+        0,
+    },
+
+    createdAt:
+      player.createdAt ??
+      player.created_at ??
+      null,
+
+    updatedAt:
+      player.updatedAt ??
+      player.updated_at ??
+      null,
+  };
+}
+
+function normalizeWeapon(weapon) {
+  return {
+    weaponName: weapon.weaponName ?? weapon.weapon_name,
+    kills: weapon.kills ?? weapon.kill_count ?? 0,
+  };
+}
 
 export const playerService = {
+
   async getPlayers() {
-    return apiResponse(mockPlayers);
+    const players =
+      await request("/players");
+
+    return players.map(normalizePlayer);
   },
+
 
   async getPlayer(steamId) {
-    const player = mockPlayers.find(
-      (p) => p.steamId === steamId
-    );
+    const player =
+      await request(
+        `/players/${steamId}`
+      );
 
-    return apiResponse(player);
+    return normalizePlayer(player);
   },
+  
+  async getWeapons(steamId) {
+    const weapons = await request(
+      `/players/${steamId}/weapons`
+    );
+  
+    return weapons.map(normalizeWeapon);
+  }
+
 };
